@@ -1,0 +1,884 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentGuard | AI Reliability Platform</title>
+<style>
+:root{--bg:#080d18;--panel:#101a2b;--panel2:#142139;--line:#24334b;--text:#e8eef9;--muted:#8ea0bb;--blue:#65a9ff;--cyan:#5ce1d0;--red:#ff7185;--amber:#f5c46b;--green:#62d6a5}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 70% -10%,#172d4b 0,transparent 38%),var(--bg);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,Segoe UI,Arial}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;background:linear-gradient(135deg,#3987f5,#5c6ff0);color:white;font-weight:650}
+button.secondary{background:#1a2941;border:1px solid var(--line);color:var(--text)}
+button.danger{background:#512333;color:#ffc3ce}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{width:100%;background:#0a1322;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--text);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+label{display:block;color:var(--muted);font-size:12px;margin:12px 0 6px}
+a{color:var(--blue)}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;letter-spacing:.3px}
+.logo{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#347ff0,#4bd6c4);color:#061322;font-weight:900}
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.auth{width:min(440px,100%);background:rgba(16,26,43,.94);border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 30px 100px #0008}
+.auth h1{font-size:25px;margin:24px 0 6px}
+.auth .tabs{display:flex;gap:8px;margin:22px 0}
+.tabs button{flex:1}
+.tabs .selected{background:#244d7f}
+.layout{display:grid;grid-template-columns:245px 1fr;min-height:100vh}
+.sidebar{background:#0a1220;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:22px}
+.navgroup{display:grid;gap:5px}
+.navlabel{font-size:10px;letter-spacing:1.5px;color:#647893;padding:0 12px 6px}
+.nav{width:100%;text-align:left;background:transparent;color:#9eafc8;padding:11px 12px;font-weight:550}
+.nav.active,.nav:hover{background:#172943;color:#fff}
+.nav span{display:inline-block;width:25px;color:#70b7ff}
+.sidebottom{margin-top:auto}
+.main{min-width:0}
+.topbar{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;background:#0a1220b8}
+.content{padding:28px 30px;max-width:1500px;margin:auto}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px}
+.pagehead h1{font-size:25px;margin:0 0 5px}
+.grid{display:grid;gap:15px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+.card{background:linear-gradient(145deg,#121e31,#0e1829);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.statlabel{color:var(--muted);font-size:12px}
+.statvalue{font-size:28px;font-weight:750;margin:9px 0 3px}
+.staticon{float:right;color:var(--blue);font-size:20px}
+.two{grid-template-columns:1.2fr .8fr}
+.three{grid-template-columns:repeat(3,1fr)}
+.card h3{margin:0 0 14px;font-size:15px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:grid;gap:12px}
+.pill{font-size:11px;border-radius:30px;padding:5px 9px;background:#1b2c45;color:#a9caff;white-space:nowrap}
+.pill.green{background:#15392f;color:#76e1b4}
+.pill.red{background:#48222c;color:#ff9baa}
+.pill.amber{background:#45351d;color:#ffd58b}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px;font-size:12px}
+th{color:#8296b2;font-weight:600}
+td{color:#d8e2f2}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.trace{display:grid;gap:10px}
+.traceitem{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:10px;background:#0a1423;border:1px solid #1c2c43;border-radius:9px}
+.traceitem .time{font-size:11px;color:#8296b2}
+.traceitem b{font-size:12px}
+.traceitem p{margin:4px 0 0;color:#aebdd1;font-size:12px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:7px}
+.dot.error{background:var(--red)}
+.dot.success{background:var(--green)}
+.dot.warning{background:var(--amber)}
+.notice{padding:12px 14px;border:1px solid #725b2e;background:#332a1a;border-radius:9px;color:#ffdda0;font-size:12px;margin:12px 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.toast{position:fixed;right:20px;bottom:20px;background:#1b2b43;border:1px solid #45617f;padding:13px 17px;border-radius:10px;z-index:9;max-width:360px;box-shadow:0 12px 40px #0008}
+.metricbar{height:7px;background:#1d2c42;border-radius:8px;overflow:hidden;margin-top:9px}
+.metricbar i{display:block;height:100%;background:linear-gradient(90deg,#4e9bff,#58dec7)}
+.risk{color:#ffbd75}
+.footer-note{color:#657b98;font-size:11px;line-height:1.5;margin-top:16px}
+
+/* Workflow Builder */
+.workflow-layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(400px,1.5fr);gap:16px}
+.workflow-list{display:grid;gap:10px}
+.workflow-item{padding:13px;background:#0a1423;border:1px solid var(--line);border-radius:10px}
+.workflow-item.selected{border-color:var(--blue);background:#14243b}
+.workflow-item h4{margin:0 0 5px}
+.workflow-node{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;padding:13px;margin:10px 0;background:#0a1423;border:1px solid #263a56;border-radius:11px}
+.workflow-node-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#1a3556;color:#80bdff;font-size:17px}
+.workflow-node.validation .workflow-node-icon{background:#3a301c;color:#ffd58b}
+.workflow-node.approval .workflow-node-icon{background:#3a202c;color:#ff9baa}
+.workflow-node h4{margin:0 0 4px;font-size:13px}
+.workflow-node p{margin:0;color:var(--muted);font-size:11px}
+.workflow-connector{height:17px;border-left:2px dashed #45617f;margin-left:31px}
+.node-actions{display:flex;gap:5px}
+.node-actions button{padding:7px 9px;font-size:11px}
+.node-number{font-size:11px;color:var(--muted)}
+.builder-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.builder-toolbar button{font-size:12px}
+.workflow-canvas{min-height:180px;padding:14px;border:1px dashed #344c6d;border-radius:12px;background:#0a1322}
+.node-config{padding:14px;margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#101a2b}
+.workflow-status{display:inline-flex;align-items:center;gap:6px}
+@media(max-width:1000px){.workflow-layout{grid-template-columns:1fr}}
+@media(max-width:900px){
+ .layout{grid-template-columns:1fr}
+ .sidebar{position:static;display:block;padding:12px}
+ .sidebar .brand{margin:4px 8px 12px}
+ .navgroup{display:flex;overflow:auto}
+ .navlabel,.sidebottom{display:none}
+ .nav{white-space:nowrap;width:auto}
+ .topbar{padding:0 16px}
+ .content{padding:20px 15px}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .two{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .stats,.three,.formgrid{grid-template-columns:1fr}
+ .pagehead{display:block}
+ .pagehead .actions{margin-top:12px}
+ .topbar{height:60px}
+ .workflow-node{grid-template-columns:32px 1fr}
+ .node-actions{grid-column:2}
+}
+</style>
+</head>
+<body>
+
+<div id="auth" class="auth-wrap">
+ <div class="auth">
+  <div class="brand"><div class="logo">A</div> AGENTGUARD</div>
+  <h1 id="authTitle">Welcome back</h1>
+  <div class="muted" id="authSub">Sign in to your AI reliability workspace.</div>
+  <div class="tabs">
+   <button id="loginTab" class="selected" onclick="showAuth('login')">Sign in</button>
+   <button id="registerTab" class="secondary" onclick="showAuth('register')">Create account</button>
+  </div>
+  <form id="loginForm" onsubmit="login(event)">
+   <label>Email address</label><input id="loginEmail" type="email" required placeholder="you@company.com">
+   <label>Password</label><input id="loginPassword" type="password" required placeholder="Your password">
+   <button style="width:100%;margin-top:20px">Sign in securely →</button>
+  </form>
+  <form id="registerForm" class="hidden" onsubmit="register(event)">
+   <label>Full name</label><input id="regName" required minlength="2" placeholder="Your name">
+   <label>Work email</label><input id="regEmail" type="email" required placeholder="you@company.com">
+   <label>Password (minimum 10 characters)</label><input id="regPassword" type="password" required minlength="10" placeholder="Create a strong password">
+   <button style="width:100%;margin-top:20px">Request access →</button>
+  </form>
+  <div class="footer-note">Protected workspace · Role-based access · Secure session cookies</div>
+ </div>
+</div>
+
+<div id="app" class="layout hidden">
+ <aside class="sidebar">
+  <div class="brand"><div class="logo">A</div> AGENTGUARD</div>
+
+  <div class="navgroup">
+   <div class="navlabel">WORKSPACE</div>
+   <button class="nav active" data-page="dashboard" onclick="go('dashboard')"><span>◫</span>Overview</button>
+   <button class="nav" data-page="lab" onclick="go('lab')"><span>⌘</span>Agent testing lab</button>
+   <button class="nav" data-page="workflows" onclick="go('workflows')"><span>◇</span>Workflow Builder</button>
+   <button class="nav" data-page="runs" onclick="go('runs')"><span>≋</span>Execution history</button>
+   <button class="nav" data-page="approvals" onclick="go('approvals')"><span>✓</span>Approval center</button>
+   <button class="nav" data-page="reports" onclick="go('reports')"><span>▤</span>Reports & exports</button>
+  </div>
+
+  <div class="navgroup" id="adminNav">
+   <div class="navlabel">ADMINISTRATION</div>
+   <button class="nav" data-page="users" onclick="go('users')"><span>♙</span>User management</button>
+   <button class="nav" data-page="policies" onclick="go('policies')"><span>⚙</span>Policy settings</button>
+   <button class="nav" data-page="audit" onclick="go('audit')"><span>▣</span>Audit logs</button>
+  </div>
+
+  <div class="sidebottom">
+   <div class="card" style="padding:12px">
+    <div class="row"><span class="muted small">SYSTEM STATUS</span><span class="pill green">Operational</span></div>
+    <div class="small muted" style="margin-top:9px">Simulated tools · SQLite storage</div>
+   </div>
+   <button class="nav" style="margin-top:12px" onclick="logout()"><span>↪</span>Sign out</button>
+  </div>
+ </aside>
+
+ <main class="main">
+  <header class="topbar">
+   <div><b id="topTitle">Overview</b><div class="muted small">AI agent reliability & runtime assurance</div></div>
+   <div class="row">
+    <span class="pill green">● System online</span>
+    <div style="text-align:right"><b id="userName">User</b><div class="muted small" id="userRole">USER</div></div>
+   </div>
+  </header>
+  <div class="content" id="view"></div>
+ </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+let ME=null,currentPage='dashboard',latestRun=null;
+let workflowSteps=[];
+let editingWorkflowId=null;
+let workflowAgents=[];
+
+const $=id=>document.getElementById(id);
+
+async function api(path,opts={}){
+ let r=await fetch('/api'+path,{
+  ...opts,
+  headers:{'Content-Type':'application/json',...(opts.headers||{})}
+ });
+ let d=await r.json().catch(()=>({detail:'Unexpected server response'}));
+ if(!r.ok)throw new Error(d.detail||'Request failed');
+ return d;
+}
+
+function toast(s){
+ $('toast').textContent=s;
+ $('toast').classList.remove('hidden');
+ setTimeout(()=>$('toast').classList.add('hidden'),3600);
+}
+
+function escapeHtml(value){
+ return String(value??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+
+function showAuth(mode){
+ let reg=mode==='register';
+ $('loginForm').classList.toggle('hidden',reg);
+ $('registerForm').classList.toggle('hidden',!reg);
+ $('loginTab').classList.toggle('selected',!reg);
+ $('registerTab').classList.toggle('selected',reg);
+ $('authTitle').textContent=reg?'Create your workspace account':'Welcome back';
+ $('authSub').textContent=reg?'Request access. An administrator will approve your account.':'Sign in to your AI reliability workspace.';
+}
+
+async function login(e){
+ e.preventDefault();
+ try{
+  await api('/login',{method:'POST',body:JSON.stringify({
+   email:$('loginEmail').value,password:$('loginPassword').value
+  })});
+  await boot();
+ }catch(x){toast(x.message)}
+}
+
+async function register(e){
+ e.preventDefault();
+ try{
+  let d=await api('/register',{method:'POST',body:JSON.stringify({
+   name:$('regName').value,email:$('regEmail').value,password:$('regPassword').value
+  })});
+  toast(d.message);
+  showAuth('login');
+ }catch(x){toast(x.message)}
+}
+
+async function logout(){
+ try{await api('/logout',{method:'POST'})}catch(e){}
+ ME=null;
+ $('app').classList.add('hidden');
+ $('auth').classList.remove('hidden');
+ showAuth('login');
+}
+
+async function boot(){
+ try{
+  ME=await api('/me');
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('userName').textContent=ME.name;
+  $('userRole').textContent=ME.role.toUpperCase();
+  $('adminNav').classList.toggle('hidden',ME.role!=='admin');
+  go('dashboard');
+ }catch(e){
+  $('app').classList.add('hidden');
+  $('auth').classList.remove('hidden');
+ }
+}
+
+function go(p){
+ if(['users','policies','audit'].includes(p)&&ME.role!=='admin'){
+  toast('Admin access required');return;
+ }
+ currentPage=p;
+ document.querySelectorAll('.nav[data-page]').forEach(n=>{
+  n.classList.toggle('active',n.dataset.page===p);
+ });
+ let titles={
+  dashboard:'Overview',
+  lab:'Agent testing lab',
+  workflows:'Visual Workflow Builder',
+  runs:'Execution history',
+  approvals:'Approval center',
+  reports:'Reports & exports',
+  users:'User management',
+  policies:'Policy settings',
+  audit:'Audit logs'
+ };
+ $('topTitle').textContent=titles[p]||'AgentGuard';
+ let pages={
+  dashboard:dashboard,
+  lab:lab,
+  workflows:workflows,
+  runs:runs,
+  approvals:approvals,
+  reports:reports,
+  users:users,
+  policies:policies,
+  audit:audit
+ };
+ if(pages[p])pages[p]();
+}
+
+function stat(label,val,icon,sub='Live database value'){
+ return `<div class="card"><div class="staticon">${icon}</div><div class="statlabel">${label}</div><div class="statvalue">${val}</div><div class="muted small">${sub}</div></div>`;
+}
+
+function statusPill(s){
+ let c=s==='verified'?'green':(['failed','blocked'].includes(s)?'red':s==='awaiting_approval'||s==='pending'?'amber':'');
+ return `<span class="pill ${c}">${escapeHtml(String(s).replaceAll('_',' '))}</span>`;
+}
+
+function tableRuns(items){
+ return items.length?`<div class="tablewrap"><table><thead><tr><th>RUN</th><th>SCENARIO</th><th>MODE</th><th>STATUS</th><th>CREATED</th><th></th></tr></thead><tbody>${items.map(r=>`<tr><td>#${r.id}</td><td>${escapeHtml(r.scenario)}</td><td>${r.guarded?'Guarded':'Baseline'}</td><td>${statusPill(r.status)}</td><td>${new Date(r.created_at).toLocaleString()}</td><td><button class="secondary" onclick="viewRun(${r.id})">Details</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No executions yet. Start a test in the Agent testing lab.</div>';
+}
+
+async function dashboard(){
+ try{
+  let d=await api('/dashboard');
+  $('view').innerHTML=`
+   <div class="pagehead">
+    <div><h1>Good ${new Date().getHours()<12?'morning':new Date().getHours()<18?'afternoon':'evening'}, ${escapeHtml(ME.name.split(' ')[0])}</h1>
+    <div class="muted">Here is the current reliability snapshot for your workspace.</div></div>
+    <button onclick="go('lab')">＋ New test run</button>
+   </div>
+   <div class="grid stats">
+    ${stat('Total executions',d.total_runs,'◷')}
+    ${stat('Verified outcomes',d.successful,'✓')}
+    ${stat('Failed / blocked',d.failed,'⚠')}
+    ${stat(ME.role==='admin'?'Registered users':'Pending approvals',ME.role==='admin'?d.total_users:d.pending_approvals,'♙')}
+   </div>
+   <div class="grid two">
+    <div class="card"><div class="row"><h3>Recent executions</h3><button class="secondary" onclick="go('runs')">View all</button></div>${tableRuns(d.recent)}</div>
+    <div class="card"><h3>Platform snapshot</h3><div class="stack">
+     <div class="row"><span class="muted">Pending approvals</span><b>${d.pending_approvals}</b></div>
+     <div class="row"><span class="muted">Awaiting account review</span><b>${ME.role==='admin'?d.pending_users:'—'}</b></div>
+     <div class="row"><span class="muted">Database</span><span class="pill green">Connected</span></div>
+     <div class="row"><span class="muted">Execution mode</span><span class="pill">Simulated tools</span></div>
+    </div><div class="notice">AgentGuard demo environment. No real customer, payment or external tool actions are performed.</div></div>
+   </div>`;
+ }catch(e){$('view').innerHTML=`<div class="card">Could not load dashboard: ${escapeHtml(e.message)}</div>`}
+}
+
+function lab(){
+ $('view').innerHTML=`
+ <div class="pagehead"><div><h1>Agent testing lab</h1><div class="muted">Inject controlled faults and compare guarded execution with a baseline.</div></div><span class="pill">DETERMINISTIC DEMO ENGINE</span></div>
+ <div class="grid two">
+  <div class="card">
+   <h3>Configure test execution</h3>
+   <label>Task instruction</label><textarea id="task" rows="3">Check order ORD-1042 and prepare a refund recommendation.</textarea>
+   <label>Fault scenario</label>
+   <select id="scenario">
+    <option value="normal">Normal execution</option>
+    <option value="malformed">Malformed tool response</option>
+    <option value="stale">Stale tool data</option>
+    <option value="timeout">Tool timeout / retry</option>
+    <option value="high_risk">High-risk refund requiring approval</option>
+   </select>
+   <label>Execution mode</label>
+   <select id="mode">
+    <option value="compare">Run guarded + baseline comparison</option>
+    <option value="guarded">Guarded execution only</option>
+    <option value="baseline">Baseline (unguarded) only</option>
+   </select>
+   <div class="notice">Faults are injected into simulated order-service responses. Recovery is bounded and read-only in this demo.</div>
+   <button onclick="runTest()">▶ Run test</button>
+  </div>
+  <div class="card">
+   <h3>What AgentGuard checks</h3>
+   <div class="stack">
+    <div><span class="dot success"></span><b>Schema validation</b><div class="muted small">Required fields and response shape</div></div>
+    <div><span class="dot success"></span><b>Freshness validation</b><div class="muted small">Version and timestamp consistency</div></div>
+    <div><span class="dot success"></span><b>Bounded recovery</b><div class="muted small">Safe retry budget and idempotency</div></div>
+    <div><span class="dot success"></span><b>Risk approval gate</b><div class="muted small">Pause before high-impact side effects</div></div>
+    <div><span class="dot success"></span><b>Independent verification</b><div class="muted small">Confirm final state before success</div></div>
+   </div>
+  </div>
+ </div>
+ <div id="runOutput" style="margin-top:16px"></div>`;
+}
+
+async function runTest(){
+ let scenario=$('scenario').value,task=$('task').value,mode=$('mode').value;
+ let modes=mode==='compare'?[true,false]:[mode==='guarded'];
+ $('runOutput').innerHTML='<div class="card">Executing scenario and recording evidence…</div>';
+ try{
+  let results=[];
+  for(let guarded of modes){
+   results.push(await api('/runs',{method:'POST',body:JSON.stringify({scenario,task,guarded})}));
+  }
+  latestRun=results[0];
+  $('runOutput').innerHTML=`
+   <div class="grid ${results.length>1?'two':''}">
+    ${results.map((r,i)=>`
+     <div class="card">
+      <div class="row"><h3>${modes[i]?'Guarded execution':'Baseline execution'}</h3>${statusPill(r.status)}</div>
+      <p>${escapeHtml(r.result)}</p>
+      <div class="grid three">${Object.entries(r.metrics).slice(0,3).map(([k,v])=>`<div><div class="muted small">${escapeHtml(k.replaceAll('_',' '))}</div><b>${escapeHtml(v)}</b></div>`).join('')}</div>
+      <h3 style="margin-top:18px">Execution trace</h3>
+      <div class="trace">${r.trace.map(t=>`<div class="traceitem"><div class="time">${escapeHtml(t.time)}</div><div><b><span class="dot ${escapeHtml(t.state)}"></span>${escapeHtml(t.step)}</b><p>${escapeHtml(t.message)}</p></div></div>`).join('')}</div>
+     </div>`).join('')}
+   </div>
+   ${results.some(r=>r.approval_required)?'<div class="notice">Approval request created. Open Approval Center to review it. No refund was executed.</div>':''}
+   <div class="footer-note">Execution IDs: ${results.map(r=>'#'+r.id).join(', ')} · Results saved to SQLite.</div>`;
+  toast('Test execution saved');
+ }catch(e){$('runOutput').innerHTML=`<div class="card">${escapeHtml(e.message)}</div>`}
+}
+
+async function runs(){
+ try{
+  let d=await api('/runs');
+  $('view').innerHTML=`<div class="pagehead"><div><h1>Execution history</h1><div class="muted">Recorded agent workflow runs and outcomes.</div></div><button onclick="go('lab')">＋ New test</button></div><div class="card">${tableRuns(d)}</div>`;
+ }catch(e){$('view').innerHTML=`<div class="card">${escapeHtml(e.message)}</div>`}
+}
+
+async function viewRun(id){
+ try{
+  let r=await api('/runs/'+id);
+  $('view').innerHTML=`
+   <div class="pagehead"><div><h1>Execution #${r.id}</h1><div class="muted">${escapeHtml(r.scenario)} · ${new Date(r.created_at).toLocaleString()}</div></div><button class="secondary" onclick="go('runs')">← Back</button></div>
+   <div class="card"><div class="row"><h3>${escapeHtml(r.task)}</h3>${statusPill(r.status)}</div><p>${escapeHtml(r.result)}</p><h3>Execution trace</h3>
+   <div class="trace">${r.trace.map(t=>`<div class="traceitem"><div class="time">${escapeHtml(t.time)}</div><div><b><span class="dot ${escapeHtml(t.state)}"></span>${escapeHtml(t.step)}</b><p>${escapeHtml(t.message)}</p></div></div>`).join('')}</div></div>`;
+ }catch(e){toast(e.message)}
+}
+
+async function approvals(){
+ try{
+  let d=await api('/approvals');
+  $('view').innerHTML=`
+   <div class="pagehead"><div><h1>Approval center</h1><div class="muted">Human review queue for actions that cross configured risk limits.</div></div></div>
+   <div class="grid">${d.length?d.map(a=>`
+    <div class="card">
+     <div class="row"><b>Approval #${a.id} · ${escapeHtml(a.scenario)}</b>${statusPill(a.status)}</div>
+     <p class="risk">${escapeHtml(a.action)}</p><p class="muted small">${escapeHtml(a.reason)}</p>
+     <div class="muted small">Requested by ${escapeHtml(a.requester)} · ${new Date(a.created_at).toLocaleString()}</div>
+     ${ME.role==='admin'&&a.status==='pending'?`<div class="actions" style="margin-top:14px"><button onclick="decide(${a.id},'approved')">Approve request</button><button class="danger" onclick="decide(${a.id},'rejected')">Reject request</button></div>`:''}
+     ${a.decision_note?`<p class="muted small">Decision note: ${escapeHtml(a.decision_note)}</p>`:''}
+    </div>`).join(''):'<div class="card empty">No approval requests yet.</div>'}</div>
+   <div class="footer-note">Approval records demonstrate a control gate only. Approving a demo request does not execute a real-world action.</div>`;
+ }catch(e){$('view').innerHTML=`<div class="card">${escapeHtml(e.message)}</div>`}
+}
+
+async function decide(id,decision){
+ let note=prompt('Optional decision note:')||'';
+ try{
+  await api('/approvals/'+id+'/decision',{method:'POST',body:JSON.stringify({decision,note})});
+  toast('Decision recorded');approvals();
+ }catch(e){toast(e.message)}
+}
+
+async function reports(){
+ $('view').innerHTML=`
+ <div class="pagehead"><div><h1>Reports & exports</h1><div class="muted">Export execution evidence for review and hackathon demonstration.</div></div></div>
+ <div class="grid three">
+  <div class="card"><h3>Execution report</h3><p class="muted small">Download your accessible execution history as CSV.</p><button onclick="location.href='/api/export/runs.csv'">↓ Export runs CSV</button></div>
+  <div class="card"><h3>Evidence trail</h3><p class="muted small">Each run stores scenario, mode, metrics, result and step trace.</p><button class="secondary" onclick="go('runs')">Browse executions</button></div>
+  <div class="card"><h3>Audit evidence</h3><p class="muted small">Admin can review authentication, account and execution events.</p><button class="secondary" onclick="go(ME.role==='admin'?'audit':'dashboard')">Open audit area</button></div>
+ </div>`;
+}
+
+async function users(){
+ try{
+  let d=await api('/admin/users');
+  $('view').innerHTML=`
+   <div class="pagehead"><div><h1>User management</h1><div class="muted">Approve self-registrations and manage workspace access.</div></div></div>
+   <div class="grid two">
+    <div class="card"><h3>Create account</h3><form onsubmit="createUser(event)">
+     <label>Name</label><input id="newName" required>
+     <label>Email</label><input id="newEmail" type="email" required>
+     <label>Temporary password (10+ characters)</label><input id="newPass" type="password" minlength="10" required>
+     <label>Role</label><select id="newRole"><option value="user">User</option><option value="admin">Admin</option></select>
+     <button style="margin-top:14px">Create active account</button>
+    </form></div>
+    <div class="card"><h3>Account overview</h3><div class="statvalue">${d.length}</div><div class="muted small">Total accounts</div><div class="notice">Self-registered accounts remain pending until an admin activates them.</div></div>
+   </div>
+   <div class="card" style="margin-top:16px"><h3>Accounts</h3><div class="tablewrap"><table><thead><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>STATUS</th><th>CREATED</th><th>ACTION</th></tr></thead><tbody>
+   ${d.map(u=>`<tr><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td><td>${escapeHtml(u.role)}</td><td>${statusPill(u.status)}</td><td>${new Date(u.created_at).toLocaleDateString()}</td><td>${u.id===ME.id?'Current account':`<button class="secondary" onclick="userStatus(${u.id},'${u.status==='active'?'disabled':'active'}')">${u.status==='active'?'Disable':'Activate'}</button>`}</td></tr>`).join('')}
+   </tbody></table></div></div>`;
+ }catch(e){$('view').innerHTML=`<div class="card">${escapeHtml(e.message)}</div>`}
+}
+
+async function createUser(e){
+ e.preventDefault();
+ try{
+  await api('/admin/users',{method:'POST',body:JSON.stringify({
+   name:$('newName').value,email:$('newEmail').value,password:$('newPass').value,role:$('newRole').value
+  })});
+  toast('Account created');users();
+ }catch(x){toast(x.message)}
+}
+
+async function userStatus(id,status){
+ try{
+  await api('/admin/users/'+id,{method:'PATCH',body:JSON.stringify({status})});
+  toast('Account updated');users();
+ }catch(e){toast(e.message)}
+}
+
+function policies(){
+ $('view').innerHTML=`
+ <div class="pagehead"><div><h1>Policy settings</h1><div class="muted">Demo policy controls used to explain AgentGuard's runtime guardrails.</div></div></div>
+ <div class="grid two">
+  <div class="card"><h3>Recovery policy</h3>
+   <label>Maximum retry attempts</label><select id="retry"><option>0</option><option>1</option><option selected>2</option><option>3</option></select>
+   <label>Retry strategy</label><select><option>Bounded retry with idempotency check</option><option>No retry</option></select>
+   <label>Allowed automatic recovery</label><select><option>Read-only refresh and retry</option><option>Read-only refresh only</option><option>Disabled</option></select>
+  </div>
+  <div class="card"><h3>Risk policy</h3>
+   <label>Human approval threshold (INR)</label><input id="threshold" type="number" value="5000" min="1">
+   <label>High-impact action behavior</label><select><option>Pause and require human approval</option><option>Block automatically</option></select>
+   <div class="notice">These controls are currently illustrative UI settings. The demo workflow uses a fixed ₹5,000 threshold and retry examples. They are not persisted or dynamically applied yet.</div>
+   <button onclick="toast('Policy settings are currently demo-only; backend policy editing is not connected.')">Save policy (demo)</button>
+  </div>
+ </div>`;
+}
+
+async function audit(){
+ try{
+  let d=await api('/admin/audit');
+  $('view').innerHTML=`
+   <div class="pagehead"><div><h1>Audit logs</h1><div class="muted">Administrative activity and security-relevant events.</div></div></div>
+   <div class="card"><div class="tablewrap"><table><thead><tr><th>TIME</th><th>ACTOR</th><th>EVENT</th><th>DETAIL</th></tr></thead><tbody>
+   ${d.map(a=>`<tr><td>${new Date(a.created_at).toLocaleString()}</td><td>${escapeHtml(a.actor||'System')}</td><td>${escapeHtml(a.event)}</td><td>${escapeHtml(a.detail)}</td></tr>`).join('')}
+   </tbody></table></div></div>`;
+ }catch(e){$('view').innerHTML=`<div class="card">${escapeHtml(e.message)}</div>`}
+}
+
+/* =====================================================
+   VISUAL WORKFLOW BUILDER
+   Uses existing backend endpoints:
+   GET    /api/agents
+   GET    /api/workflows
+   POST   /api/workflows
+   GET    /api/workflows/{id}
+   PATCH  /api/workflows/{id}
+===================================================== */
+
+function newWorkflow(){
+    editingWorkflowId = null;
+    workflowSteps = [];
+
+    const editor = document.getElementById('workflowEditor');
+
+    if (!editor) {
+        toast('Workflow editor panel was not found. Refresh the page.');
+        return;
+    }
+
+    renderWorkflowEditor({
+        name: '',
+        description: '',
+        agent_id: '',
+        status: 'draft'
+    });
+
+    toast('New workflow editor opened');
+}
+
+async function workflows(){
+ $('view').innerHTML='<div class="card">Loading workflows and agents…</div>';
+ try{
+  let [w,a]=await Promise.all([
+   api('/workflows'),
+   api('/agents')
+  ]);
+
+  workflowAgents=Array.isArray(a)?a:(a.agents||[]);
+  let workflowList=Array.isArray(w)?w:(w.workflows||[]);
+
+  renderWorkflowPage(workflowList);
+ }catch(e){
+  $('view').innerHTML=`
+   <div class="pagehead"><div><h1>Visual Workflow Builder</h1><div class="muted">Create and manage agent workflows.</div></div></div>
+   <div class="card">
+    <h3>Could not load the workflow builder</h3>
+    <p class="muted">${escapeHtml(e.message)}</p>
+    <p class="small muted">Check that your FastAPI server is running and that /api/workflows and /api/agents are available.</p>
+    <button onclick="workflows()">Try again</button>
+   </div>`;
+ }
+}
+
+function renderWorkflowPage(list){
+ $('view').innerHTML=`
+  <div class="pagehead">
+   <div><h1>Visual Workflow Builder</h1><div class="muted">Design agent workflows using connected execution steps.</div></div>
+   <button type="button" onclick="newWorkflow()">＋ Create workflow</button>
+  </div>
+
+  <div class="notice">
+   Workflows are currently saved as structured step definitions. This builder does not yet execute these custom workflows; execution remains in the Agent testing lab.
+  </div>
+
+  <div class="workflow-layout">
+   <div class="card">
+    <div class="row"><h3>Saved workflows</h3><span class="pill">${list.length} total</span></div>
+    <div class="workflow-list">
+     ${list.length?list.map(w=>`
+      <div class="workflow-item">
+       <div class="row">
+        <h4>${escapeHtml(w.name)}</h4>
+        ${statusPill(w.status||'draft')}
+       </div>
+       <p class="muted small">${escapeHtml(w.description||'No description')}</p>
+       <div class="muted small">Workflow #${w.id} · Agent: ${escapeHtml(String(w.agent_id??'Not assigned'))}</div>
+       <div class="actions" style="margin-top:10px">
+        <button class="secondary" onclick="loadWorkflow(${w.id})">Edit workflow</button>
+       </div>
+      </div>
+     `).join(''):'<div class="empty">No workflows created yet. Create your first workflow.</div>'}
+    </div>
+   </div>
+
+   <div id="workflowEditor" class="card">
+    <div class="empty">
+     <div style="font-size:34px;margin-bottom:12px">◇</div>
+     <h3>Build your first workflow</h3>
+     <p>Create a workflow, assign an agent and add steps to the workflow canvas.</p>
+     <button onclick="newWorkflow()">＋ Create workflow</button>
+    </div>
+   </div>
+  </div>`;
+}
+
+function agentOptions(selected){
+ let options='<option value="">Select an agent</option>';
+ workflowAgents.forEach(a=>{
+  options+=`<option value="${a.id}" ${String(a.id)===String(selected)?'selected':''}>${escapeHtml(a.name)} (ID: ${a.id})</option>`;
+ });
+ return options;
+}
+
+function renderWorkflowEditor(data){
+ let editor=$('workflowEditor');
+ if(!editor)return;
+
+ editor.innerHTML=`
+  <div class="row">
+   <div><h3>${editingWorkflowId?'Edit workflow #'+editingWorkflowId:'Create workflow'}</h3><div class="muted small">Configure workflow details and steps.</div></div>
+   <span class="pill">${editingWorkflowId?'EDITING':'NEW'}</span>
+  </div>
+
+  <label>Workflow name</label>
+  <input id="wfName" value="${escapeHtml(data.name||'')}" placeholder="e.g. Customer Support Workflow">
+
+  <label>Description</label>
+  <textarea id="wfDescription" rows="2" placeholder="Describe what this workflow should do…">${escapeHtml(data.description||'')}</textarea>
+
+  <label>Assigned agent</label>
+  <select id="wfAgent">${agentOptions(data.agent_id)}</select>
+
+  <label>Workflow status</label>
+  <select id="wfStatus">
+   <option value="draft" ${data.status==='draft'?'selected':''}>Draft</option>
+   <option value="active" ${data.status==='active'?'selected':''}>Active</option>
+  </select>
+
+  <div class="row" style="margin-top:22px">
+   <h3 style="margin:0">Workflow canvas</h3>
+   <span class="pill">${workflowSteps.length} steps</span>
+  </div>
+
+  <div class="builder-toolbar">
+   <button onclick="addWorkflowStep('tool_call')">＋ Tool call</button>
+   <button class="secondary" onclick="addWorkflowStep('validation')">＋ Validation</button>
+   <button class="secondary" onclick="addWorkflowStep('approval')">＋ Approval</button>
+  </div>
+
+  <div id="workflowCanvas" class="workflow-canvas"></div>
+
+  <div class="actions" style="margin-top:18px">
+   <button onclick="saveWorkflow()">Save workflow</button>
+   <button class="secondary" onclick="workflows()">Cancel</button>
+  </div>
+
+  <div class="footer-note">Steps are stored in order. Use the arrows on each step to change the sequence.</div>`;
+
+ renderWorkflowNodes();
+}
+
+function addWorkflowStep(type){
+ let count=workflowSteps.length+1;
+ let step={
+  id:'step_'+Date.now()+'_'+count,
+  type:type,
+  name:type==='tool_call'?'New Tool Call':type==='validation'?'Validate Response':'Human Approval',
+  config:type==='tool_call'?{tool:'order_lookup'}:
+         type==='validation'?{required_fields:['order_id','status']}:
+         {required_for:'high_risk_actions'}
+ };
+ workflowSteps.push(step);
+ renderWorkflowNodes();
+}
+
+function renderWorkflowNodes(){
+ let canvas=$('workflowCanvas');
+ if(!canvas)return;
+
+ if(!workflowSteps.length){
+  canvas.innerHTML='<div class="empty">Your workflow is empty. Add a step using the buttons above.</div>';
+  return;
+ }
+
+ canvas.innerHTML=workflowSteps.map((s,i)=>{
+  let icon=s.type==='tool_call'?'⌘':s.type==='validation'?'✓':'♙';
+  let typeLabel=s.type==='tool_call'?'TOOL CALL':s.type==='validation'?'VALIDATION':'HUMAN APPROVAL';
+  let configText=s.type==='tool_call'
+   ?'Tool: '+(s.config.tool||'Not configured')
+   :s.type==='validation'
+    ?'Required fields: '+(s.config.required_fields||[]).join(', ')
+    :'Required for: '+(s.config.required_for||'high_risk_actions');
+
+  return `
+   ${i>0?'<div class="workflow-connector"></div>':''}
+   <div class="workflow-node ${escapeHtml(s.type)}">
+    <div class="workflow-node-icon">${icon}</div>
+    <div>
+     <div class="node-number">STEP ${i+1} · ${typeLabel}</div>
+     <h4>${escapeHtml(s.name)}</h4>
+     <p>${escapeHtml(configText)}</p>
+    </div>
+    <div class="node-actions">
+     <button class="secondary" title="Edit step" onclick="editWorkflowStep(${i})">Edit</button>
+     <button class="secondary" title="Move up" onclick="moveWorkflowStep(${i},-1)" ${i===0?'disabled':''}>↑</button>
+     <button class="secondary" title="Move down" onclick="moveWorkflowStep(${i},1)" ${i===workflowSteps.length-1?'disabled':''}>↓</button>
+     <button class="danger" title="Remove step" onclick="removeWorkflowStep(${i})">×</button>
+    </div>
+   </div>`;
+ }).join('');
+}
+
+function moveWorkflowStep(index,direction){
+ let target=index+direction;
+ if(target<0||target>=workflowSteps.length)return;
+ [workflowSteps[index],workflowSteps[target]]=[workflowSteps[target],workflowSteps[index]];
+ renderWorkflowNodes();
+}
+
+function removeWorkflowStep(index){
+ if(!confirm('Remove this workflow step?'))return;
+ workflowSteps.splice(index,1);
+ renderWorkflowNodes();
+}
+
+function editWorkflowStep(index){
+ let step=workflowSteps[index];
+ let editor=$('workflowEditor');
+ if(!editor)return;
+
+ let configFields='';
+ if(step.type==='tool_call'){
+  configFields=`
+   <label>Tool name</label>
+   <input id="stepTool" value="${escapeHtml(step.config.tool||'')}" placeholder="e.g. order_lookup">`;
+ }else if(step.type==='validation'){
+  configFields=`
+   <label>Required fields (comma-separated)</label>
+   <input id="stepFields" value="${escapeHtml((step.config.required_fields||[]).join(', '))}" placeholder="order_id, status">`;
+ }else{
+  configFields=`
+   <label>Approval required for</label>
+   <input id="stepApproval" value="${escapeHtml(step.config.required_for||'high_risk_actions')}" placeholder="high_risk_actions">`;
+ }
+
+ let old=$('stepConfig');
+ if(old)old.remove();
+
+ let box=document.createElement('div');
+ box.id='stepConfig';
+ box.className='node-config';
+ box.innerHTML=`
+  <div class="row"><h3>Edit step ${index+1}</h3><span class="pill">${escapeHtml(step.type)}</span></div>
+  <label>Step name</label>
+  <input id="stepName" value="${escapeHtml(step.name)}">
+  ${configFields}
+  <div class="actions" style="margin-top:14px">
+   <button onclick="applyWorkflowStep(${index})">Apply changes</button>
+   <button class="secondary" onclick="document.getElementById('stepConfig').remove()">Cancel</button>
+  </div>`;
+ editor.appendChild(box);
+ box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function applyWorkflowStep(index){
+ let step=workflowSteps[index];
+ step.name=$('stepName').value.trim()||step.name;
+
+ if(step.type==='tool_call'){
+  step.config.tool=$('stepTool').value.trim()||'order_lookup';
+ }else if(step.type==='validation'){
+  step.config.required_fields=$('stepFields').value.split(',').map(x=>x.trim()).filter(Boolean);
+ }else{
+  step.config.required_for=$('stepApproval').value.trim()||'high_risk_actions';
+ }
+
+ $('stepConfig').remove();
+ renderWorkflowNodes();
+ toast('Workflow step updated');
+}
+
+async function loadWorkflow(id){
+ try{
+  let w=await api('/workflows/'+id);
+  editingWorkflowId=w.id;
+  workflowSteps=Array.isArray(w.steps)?w.steps.map((s,i)=>({
+   id:s.id||'step_'+(i+1),
+   type:s.type||'tool_call',
+   name:s.name||'Workflow step',
+   config:s.config||{}
+  })):[];
+  if(!workflowAgents.length){
+   let a=await api('/agents');
+   workflowAgents=Array.isArray(a)?a:(a.agents||[]);
+  }
+  renderWorkflowEditor(w);
+  toast('Workflow loaded');
+ }catch(e){toast('Could not load workflow: '+e.message)}
+}
+
+async function saveWorkflow(){
+ let name=$('wfName')?.value.trim();
+ let description=$('wfDescription')?.value.trim()||'';
+ let agentValue=$('wfAgent')?.value;
+ let status=$('wfStatus')?.value||'draft';
+
+ if(!name){
+  toast('Please enter a workflow name');
+  $('wfName')?.focus();
+  return;
+ }
+ if(!agentValue){
+  toast('Please select an agent');
+  $('wfAgent')?.focus();
+  return;
+ }
+ if(!workflowSteps.length){
+  toast('Add at least one workflow step');
+  return;
+ }
+
+ let payload={
+  name:name,
+  description:description,
+  agent_id:Number(agentValue),
+  status:status,
+  steps:workflowSteps
+ };
+
+ try{
+  if(editingWorkflowId){
+   await api('/workflows/'+editingWorkflowId,{
+    method:'PATCH',
+    body:JSON.stringify(payload)
+   });
+   toast('Workflow updated successfully');
+  }else{
+   await api('/workflows',{
+    method:'POST',
+    body:JSON.stringify(payload)
+   });
+   toast('Workflow created successfully');
+  }
+  await workflows();
+ }catch(e){
+  toast('Could not save workflow: '+e.message);
+ }
+}
+
+boot();
+</script>
+</body>
+</html>
